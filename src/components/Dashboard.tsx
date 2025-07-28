@@ -1,77 +1,66 @@
 import React from 'react';
 import { TrendingUp, Clock, CheckCircle, DollarSign, Activity, MapPin } from 'lucide-react';
-import { useTravauxStore } from '../store/travauxStore';
+import { useTravauxStats, useTravaux } from '../hooks/queries/useTravauxQueries';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import ProgressBar from './ui/ProgressBar';
 import LoadingSpinner from './ui/LoadingSpinner';
 import ErrorMessage from './ui/ErrorMessage';
 
 const Dashboard: React.FC = () => {
-  const travaux = useTravauxStore((state) => state.travaux);
-  const loading = useTravauxStore((state) => state.loading);
-  const error = useTravauxStore((state) => state.error);
-  
-  const statistiques = React.useMemo(() => ({
-    totalTravaux: travaux.length,
-    travauxEnCours: travaux.filter((t: any) => t.statut === 'en_cours').length,
-    travauxTermines: travaux.filter((t: any) => t.statut === 'termine').length,
-    budgetTotal: travaux.reduce((sum: number, t: any) => sum + t.budget, 0),
-    progressionMoyenne: travaux.length > 0 
-      ? Math.round(travaux.reduce((sum: number, t: any) => sum + t.progression, 0) / travaux.length)
-      : 0,
-    zonesActives: new Set(travaux.map((t: any) => t.zoneId)).size,
-  }), [travaux]);
+  const { data: statistiques, isLoading: statsLoading, error: statsError } = useTravauxStats();
+  const { data: travaux, isLoading: travauxLoading, error: travauxError } = useTravaux();
 
-  const travauxRecents = React.useMemo(() => travaux.slice(0, 3), [travaux]);
+  const travauxRecents = React.useMemo(() => travaux?.slice(0, 3) || [], [travaux]);
 
   const cards = [
     {
       title: 'Total Travaux',
-      value: statistiques.totalTravaux,
+      value: statistiques?.totalTravaux || 0,
       icon: Activity,
       color: 'bg-blue-500',
       change: '+2 ce mois'
     },
     {
       title: 'En Cours',
-      value: statistiques.travauxEnCours,
+      value: statistiques?.travauxEnCours || 0,
       icon: Clock,
       color: 'bg-orange-500',
       change: '40% du total'
     },
     {
       title: 'Terminés',
-      value: statistiques.travauxTermines,
+      value: statistiques?.travauxTermines || 0,
       icon: CheckCircle,
       color: 'bg-green-500',
       change: '+1 cette semaine'
     },
     {
       title: 'Budget Total',
-      value: formatCurrency(statistiques.budgetTotal),
+      value: formatCurrency(statistiques?.budgetTotal || 0),
       icon: DollarSign,
       color: 'bg-purple-500',
       change: '+5% vs mois dernier'
     },
     {
       title: 'Progression Moy.',
-      value: `${statistiques.progressionMoyenne}%`,
+      value: `${statistiques?.progressionMoyenne || 0}%`,
       icon: TrendingUp,
       color: 'bg-teal-500',
       change: '+3% cette semaine'
     },
     {
       title: 'Zones Actives',
-      value: statistiques.zonesActives,
+      value: statistiques?.zonesActives || 0,
       icon: MapPin,
       color: 'bg-red-500',
       change: '62% des zones'
     }
   ];
 
+  const isLoading = statsLoading || travauxLoading;
+  const error = statsError || travauxError;
 
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-6 flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -82,7 +71,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       {error && (
-        <ErrorMessage message={error} className="mb-4" />
+        <ErrorMessage message={error?.message || 'Une erreur est survenue'} className="mb-4" />
       )}
 
       <div className="flex items-center justify-between">

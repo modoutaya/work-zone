@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Eye, Edit, Trash2 } from 'lucide-react';
-import { useTravauxStore } from '../store/travauxStore';
+import { useTravaux, useDeleteTravail } from '../hooks/queries/useTravauxQueries';
 import { Travail } from '../types';
 import StatusBadge from './ui/StatusBadge';
 import PriorityBadge from './ui/PriorityBadge';
@@ -15,17 +15,15 @@ interface TravauxListProps {
 }
 
 const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
-  const travaux = useTravauxStore((state) => state.travaux);
-  const loading = useTravauxStore((state) => state.loading);
-  const error = useTravauxStore((state) => state.error);
-  const deleteTravail = useTravauxStore((state) => state.deleteTravail);
+  const { data: travaux = [], isLoading, error } = useTravaux();
+  const deleteTravailMutation = useDeleteTravail();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce travail ?')) {
-      deleteTravail(id);
+      deleteTravailMutation.mutate(id);
     }
   };
 
@@ -38,7 +36,7 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-6 flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -49,7 +47,7 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
   return (
     <div className="p-6 space-y-6">
       {error && (
-        <ErrorMessage message={error} className="mb-4" />
+        <ErrorMessage message={error?.message || 'Une erreur est survenue'} className="mb-4" />
       )}
 
       <div className="flex items-center justify-between">
