@@ -1,8 +1,27 @@
 import React from 'react';
 import { TrendingUp, Clock, CheckCircle, DollarSign, Activity, MapPin } from 'lucide-react';
-import { statistiques, travaux } from '../data/mockData';
+import { useTravaux } from '../hooks/useTravaux';
+import { formatCurrency, formatDate } from '../utils/formatters';
+import ProgressBar from './ui/ProgressBar';
+import LoadingSpinner from './ui/LoadingSpinner';
+import ErrorMessage from './ui/ErrorMessage';
 
 const Dashboard: React.FC = () => {
+  const { travaux, loading, error } = useTravaux();
+
+  const statistiques = React.useMemo(() => {
+    return {
+      totalTravaux: travaux.length,
+      travauxEnCours: travaux.filter(t => t.statut === 'en_cours').length,
+      travauxTermines: travaux.filter(t => t.statut === 'termine').length,
+      budgetTotal: travaux.reduce((sum, t) => sum + t.budget, 0),
+      progressionMoyenne: travaux.length > 0 
+        ? Math.round(travaux.reduce((sum, t) => sum + t.progression, 0) / travaux.length)
+        : 0,
+      zonesActives: new Set(travaux.map(t => t.zoneId)).size,
+    };
+  }, [travaux]);
+
   const cards = [
     {
       title: 'Total Travaux',
@@ -27,7 +46,7 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Budget Total',
-      value: `${(statistiques.budgetTotal / 1000000).toFixed(1)}M€`,
+      value: formatCurrency(statistiques.budgetTotal),
       icon: DollarSign,
       color: 'bg-purple-500',
       change: '+5% vs mois dernier'
@@ -50,12 +69,24 @@ const Dashboard: React.FC = () => {
 
   const travauxRecents = travaux.slice(0, 3);
 
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
+      {error && (
+        <ErrorMessage message={error} className="mb-4" />
+      )}
+
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-800">Tableau de Bord</h2>
         <div className="text-sm text-gray-600">
-          Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}
+          Dernière mise à jour: {formatDate(new Date())}
         </div>
       </div>
 
@@ -90,15 +121,7 @@ const Dashboard: React.FC = () => {
                 <h4 className="font-medium text-gray-800">{travail.titre}</h4>
                 <p className="text-sm text-gray-600">{travail.zone.nom} • {travail.type}</p>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="w-32 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="h-2 bg-blue-600 rounded-full transition-all duration-500"
-                    style={{ width: `${travail.progression}%` }}
-                  />
-                </div>
-                <span className="text-sm font-medium text-gray-800 w-12">{travail.progression}%</span>
-              </div>
+              <ProgressBar value={travail.progression} className="w-32" />
             </div>
           ))}
         </div>

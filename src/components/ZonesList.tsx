@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Users, Ruler, Plus, Eye, Edit } from 'lucide-react';
-import { zones, travaux } from '../data/mockData';
+import { zones } from '../data/mockData';
+import { useTravaux } from '../hooks/useTravaux';
+import { formatNumber, formatCurrency } from '../utils/formatters';
+import LoadingSpinner from './ui/LoadingSpinner';
+import ErrorMessage from './ui/ErrorMessage';
 
 const ZonesList: React.FC = () => {
+  const { travaux, loading, error } = useTravaux();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   const filteredZones = zones.filter(zone => {
     const matchesSearch = zone.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -26,6 +39,10 @@ const ZonesList: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {error && (
+        <ErrorMessage message={error} className="mb-4" />
+      )}
+
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-800">Gestion des Zones</h2>
         <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
@@ -93,7 +110,7 @@ const ZonesList: React.FC = () => {
                     <Users size={16} className="text-gray-500" />
                     <div>
                       <p className="text-xs text-gray-600">Population</p>
-                      <p className="text-sm font-medium">{zone.population.toLocaleString('fr-FR')}</p>
+                      <p className="text-sm font-medium">{formatNumber(zone.population)}</p>
                     </div>
                   </div>
                 )}
@@ -128,7 +145,7 @@ const ZonesList: React.FC = () => {
                 <div className="mt-3 text-center">
                   <p className="text-sm text-gray-600">Budget total</p>
                   <p className="text-lg font-bold text-purple-600">
-                    {(stats.budget / 1000000).toFixed(1)}M€
+                    {formatCurrency(stats.budget)}
                   </p>
                 </div>
               </div>

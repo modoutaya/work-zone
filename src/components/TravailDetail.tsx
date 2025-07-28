@@ -1,6 +1,9 @@
 import React from 'react';
-import { ArrowLeft, Calendar, DollarSign, User, Building, MapPin, AlertCircle, Clock, CheckCircle, Pause } from 'lucide-react';
+import { ArrowLeft, Calendar, DollarSign, User, Building, MapPin, Clock } from 'lucide-react';
 import { Travail } from '../types';
+import StatusBadge from './ui/StatusBadge';
+import ProgressBar from './ui/ProgressBar';
+import { formatCurrency, formatDate, formatType, calculateDaysBetween } from '../utils/formatters';
 
 interface TravailDetailProps {
   travail: Travail;
@@ -8,38 +11,6 @@ interface TravailDetailProps {
 }
 
 const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
-  const getStatusIcon = (statut: string) => {
-    switch (statut) {
-      case 'planifie': return <Clock size={20} className="text-gray-500" />;
-      case 'en_cours': return <AlertCircle size={20} className="text-orange-500" />;
-      case 'suspendu': return <Pause size={20} className="text-red-500" />;
-      case 'termine': return <CheckCircle size={20} className="text-green-500" />;
-      default: return <Clock size={20} className="text-gray-500" />;
-    }
-  };
-
-  const getStatusColor = (statut: string) => {
-    switch (statut) {
-      case 'planifie': return 'bg-gray-100 text-gray-800';
-      case 'en_cours': return 'bg-orange-100 text-orange-800';
-      case 'suspendu': return 'bg-red-100 text-red-800';
-      case 'termine': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatType = (type: string) => {
-    const types = {
-      'infrastructure': 'Infrastructure',
-      'transport': 'Transport',
-      'energie': 'Énergie',
-      'eau': 'Eau',
-      'education': 'Éducation',
-      'sante': 'Santé'
-    };
-    return types[type as keyof typeof types] || type;
-  };
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
@@ -61,12 +32,7 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
                 <h3 className="text-2xl font-bold text-gray-800">{travail.titre}</h3>
                 <p className="text-gray-600 mt-2">{travail.description}</p>
               </div>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(travail.statut)}
-                <span className={`px-3 py-1 text-sm rounded-full ${getStatusColor(travail.statut)}`}>
-                  {travail.statut.replace('_', ' ')}
-                </span>
-              </div>
+              <StatusBadge status={travail.statut as any} size="lg" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -101,16 +67,8 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-600">Progression</span>
-                <span className="text-sm font-bold text-gray-800">{travail.progression}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className="h-3 bg-blue-600 rounded-full transition-all duration-500"
-                  style={{ width: `${travail.progression}%` }}
-                />
-              </div>
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Progression</h4>
+              <ProgressBar value={travail.progression} size="lg" />
             </div>
 
             {travail.commentaires && (
@@ -131,7 +89,7 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium text-gray-800">{item.action}</h4>
-                      <span className="text-sm text-gray-600">{new Date(item.date).toLocaleDateString('fr-FR')}</span>
+                      <span className="text-sm text-gray-600">{formatDate(item.date)}</span>
                     </div>
                     <p className="text-gray-600 mt-1">{item.description}</p>
                     <p className="text-sm text-gray-500 mt-2">Par {item.utilisateur}</p>
@@ -152,7 +110,7 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
                 <div>
                   <p className="text-sm text-gray-600">Budget Total</p>
                   <p className="text-xl font-bold text-green-600">
-                    {travail.budget.toLocaleString('fr-FR')}€
+                    {formatCurrency(travail.budget)}
                   </p>
                 </div>
               </div>
@@ -161,7 +119,7 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
                 <div>
                   <p className="text-sm text-gray-600">Coût au km²</p>
                   <p className="text-lg font-semibold text-blue-600">
-                    {travail.zone.superficie ? Math.round(travail.budget / travail.zone.superficie).toLocaleString('fr-FR') : 'N/A'}€
+                    {travail.zone.superficie ? formatCurrency(Math.round(travail.budget / travail.zone.superficie)) : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -175,14 +133,14 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
                 <Calendar size={20} className="text-blue-500" />
                 <div>
                   <p className="text-sm text-gray-600">Date de début</p>
-                  <p className="font-medium">{new Date(travail.dateDebut).toLocaleDateString('fr-FR')}</p>
+                  <p className="font-medium">{formatDate(travail.dateDebut)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Calendar size={20} className="text-red-500" />
                 <div>
                   <p className="text-sm text-gray-600">Date de fin</p>
-                  <p className="font-medium">{new Date(travail.dateFin).toLocaleDateString('fr-FR')}</p>
+                  <p className="font-medium">{formatDate(travail.dateFin)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -190,7 +148,7 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
                 <div>
                   <p className="text-sm text-gray-600">Durée</p>
                   <p className="font-medium">
-                    {Math.ceil((new Date(travail.dateFin).getTime() - new Date(travail.dateDebut).getTime()) / (1000 * 60 * 60 * 24))} jours
+                    {calculateDaysBetween(travail.dateDebut, travail.dateFin)} jours
                   </p>
                 </div>
               </div>

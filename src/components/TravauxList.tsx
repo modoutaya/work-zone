@@ -1,16 +1,30 @@
 import React, { useState } from 'react';
-import { Search, Filter, Plus, Eye, Edit, Trash2, Clock, CheckCircle, AlertCircle, Pause } from 'lucide-react';
-import { travaux } from '../data/mockData';
+import { Search, Filter, Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { useTravaux } from '../hooks/useTravaux';
 import { Travail } from '../types';
+import StatusBadge from './ui/StatusBadge';
+import PriorityBadge from './ui/PriorityBadge';
+import ProgressBar from './ui/ProgressBar';
+import ErrorMessage from './ui/ErrorMessage';
+import LoadingSpinner from './ui/LoadingSpinner';
+import { formatCurrency, formatType } from '../utils/formatters';
+import { TRAVAIL_TYPES, TRAVAIL_STATUTS } from '../utils/constants';
 
 interface TravauxListProps {
   onSelectTravail: (travail: Travail) => void;
 }
 
 const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
+  const { travaux, loading, error, deleteTravail } = useTravaux();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce travail ?')) {
+      deleteTravail(id);
+    }
+  };
 
   const filteredTravaux = travaux.filter(travail => {
     const matchesSearch = travail.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -21,50 +35,20 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const getStatusIcon = (statut: string) => {
-    switch (statut) {
-      case 'planifie': return <Clock size={16} className="text-gray-500" />;
-      case 'en_cours': return <AlertCircle size={16} className="text-orange-500" />;
-      case 'suspendu': return <Pause size={16} className="text-red-500" />;
-      case 'termine': return <CheckCircle size={16} className="text-green-500" />;
-      default: return <Clock size={16} className="text-gray-500" />;
-    }
-  };
-
-  const getStatusColor = (statut: string) => {
-    switch (statut) {
-      case 'planifie': return 'bg-gray-100 text-gray-800';
-      case 'en_cours': return 'bg-orange-100 text-orange-800';
-      case 'suspendu': return 'bg-red-100 text-red-800';
-      case 'termine': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityColor = (priorite: string) => {
-    switch (priorite) {
-      case 'basse': return 'bg-blue-100 text-blue-800';
-      case 'normale': return 'bg-gray-100 text-gray-800';
-      case 'haute': return 'bg-orange-100 text-orange-800';
-      case 'urgente': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatType = (type: string) => {
-    const types = {
-      'infrastructure': 'Infrastructure',
-      'transport': 'Transport',
-      'energie': 'Énergie',
-      'eau': 'Eau',
-      'education': 'Éducation',
-      'sante': 'Santé'
-    };
-    return types[type as keyof typeof types] || type;
-  };
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
+      {error && (
+        <ErrorMessage message={error} className="mb-4" />
+      )}
+
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-800">Gestion des Travaux</h2>
         <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
@@ -93,10 +77,11 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Tous les statuts</option>
-            <option value="planifie">Planifié</option>
-            <option value="en_cours">En cours</option>
-            <option value="suspendu">Suspendu</option>
-            <option value="termine">Terminé</option>
+            {TRAVAIL_STATUTS.map(status => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
           </select>
 
           <select
@@ -105,12 +90,11 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Tous les types</option>
-            <option value="infrastructure">Infrastructure</option>
-            <option value="transport">Transport</option>
-            <option value="energie">Énergie</option>
-            <option value="eau">Eau</option>
-            <option value="education">Éducation</option>
-            <option value="sante">Santé</option>
+            {TRAVAIL_TYPES.map(type => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
           </select>
 
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
@@ -157,33 +141,16 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
                     <span className="text-sm text-gray-800">{formatType(travail.type)}</span>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(travail.statut)}
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(travail.statut)}`}>
-                        {travail.statut.replace('_', ' ')}
-                      </span>
-                    </div>
+                    <StatusBadge status={travail.statut as any} />
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(travail.priorite)}`}>
-                      {travail.priorite}
-                    </span>
+                    <PriorityBadge priority={travail.priorite as any} />
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="h-2 bg-blue-600 rounded-full transition-all duration-500"
-                          style={{ width: `${travail.progression}%` }}
-                        />
-                      </div>
-                      <span className="text-sm text-gray-600">{travail.progression}%</span>
-                    </div>
+                    <ProgressBar value={travail.progression} className="w-24" />
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-sm text-gray-800">
-                      {(travail.budget / 1000).toLocaleString('fr-FR')}k€
-                    </span>
+                    <span className="text-sm text-gray-800">{formatCurrency(travail.budget)}</span>
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
@@ -196,7 +163,10 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
                       <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200">
                         <Edit size={16} />
                       </button>
-                      <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200">
+                     <button 
+                       onClick={() => handleDelete(travail.id)}
+                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                     >
                         <Trash2 size={16} />
                       </button>
                     </div>

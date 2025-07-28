@@ -4,19 +4,23 @@ import Dashboard from './components/Dashboard';
 import TravauxList from './components/TravauxList';
 import TravailDetail from './components/TravailDetail';
 import ZonesList from './components/ZonesList';
+import { useTravaux } from './hooks/useTravaux';
 import { Travail } from './types';
 
 function App() {
+  const { getTravailById } = useTravaux();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedTravail, setSelectedTravail] = useState<Travail | null>(null);
+  const [selectedTravailId, setSelectedTravailId] = useState<string | null>(null);
 
   const handleSelectTravail = (travail: Travail) => {
-    setSelectedTravail(travail);
+    setSelectedTravailId(travail.id);
   };
 
   const handleBackToList = () => {
-    setSelectedTravail(null);
+    setSelectedTravailId(null);
   };
+
+  const selectedTravail = selectedTravailId ? getTravailById(selectedTravailId) : null;
 
   const renderContent = () => {
     if (selectedTravail) {
