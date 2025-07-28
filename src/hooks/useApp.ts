@@ -1,7 +1,7 @@
 import { useAppStore } from '../store/appStore';
 import { useTravauxStore } from '../store/travauxStore';
 
-// Hook pour l'état de navigation
+// Hook for navigation state
 export const useNavigation = () => {
   const activeTab = useAppStore((state) => state.activeTab);
   const selectedTravailId = useAppStore((state) => state.selectedTravailId);
@@ -18,7 +18,7 @@ export const useNavigation = () => {
   };
 };
 
-// Hook pour l'état UI global
+// Hook for global UI state
 export const useUI = () => {
   const isLoading = useAppStore((state) => state.isLoading);
   const error = useAppStore((state) => state.error);
@@ -33,7 +33,7 @@ export const useUI = () => {
   };
 };
 
-// Hook pour les travaux - sélecteurs atomiques
+// Hook for works - atomic selectors
 export const useTravaux = () => {
   const travaux = useTravauxStore((state) => state.travaux);
   const loading = useTravauxStore((state) => state.loading);

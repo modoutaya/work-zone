@@ -1,25 +1,25 @@
-# Architecture Zustand - Gestion d'État Global
+# Zustand Architecture - Global State Management
 
-## Vue d'ensemble
+## Overview
 
-Ce projet utilise **Zustand** comme solution de gestion d'état global, remplaçant l'utilisation de `useState` local pour une meilleure scalabilité et maintenabilité.
+This project uses **Zustand** as a global state management solution, replacing local `useState` usage for better scalability and maintainability.
 
-## Structure des Stores
+## Store Structure
 
 ### 1. AppStore (`src/store/appStore.ts`)
-Gère l'état global de l'application :
+Manages global application state:
 - **Navigation** : `activeTab`, `selectedTravailId`
 - **UI State** : `isLoading`, `error`
 - **Actions** : `setActiveTab`, `setSelectedTravailId`, `setLoading`, `setError`
 
 ### 2. TravauxStore (`src/store/travauxStore.ts`)
-Gère l'état des travaux :
+Manages work state:
 - **Data** : `travaux`, `selectedTravail`
 - **UI State** : `loading`, `error`
 - **Actions** : CRUD operations, computed values
 - **Computed** : `getTravauxByStatus`, `getTravauxByZone`, `getTravauxByType`
 
-## Hooks Personnalisés (`src/hooks/useApp.ts`)
+## Custom Hooks (`src/hooks/useApp.ts`)
 
 ### useNavigation()
 ```typescript
@@ -41,80 +41,80 @@ const { travaux, loading, error, addTravail, updateTravail, deleteTravail } = us
 const { totalTravaux, travauxEnCours, budgetTotal, progressionMoyenne } = useTravauxStats();
 ```
 
-## Avantages de cette Architecture
+## Benefits of this Architecture
 
 ### ✅ **Performance**
-- Sélecteurs optimisés pour éviter les re-renders inutiles
-- Computed values mémorisées
-- Bundle size minimal (~2.5kb)
+- Optimized selectors to avoid unnecessary re-renders
+- Memoized computed values
+- Minimal bundle size (~2.5kb)
 
 ### ✅ **Developer Experience**
-- TypeScript natif avec inférence de types
-- DevTools intégrées (en développement)
-- API simple et intuitive
+- Native TypeScript with type inference
+- Integrated DevTools (in development)
+- Simple and intuitive API
 
-### ✅ **Maintenabilité**
-- Séparation claire des responsabilités
-- Hooks personnalisés pour l'abstraction
-- Code prévisible et testable
+### ✅ **Maintainability**
+- Clear separation of responsibilities
+- Custom hooks for abstraction
+- Predictable and testable code
 
-### ✅ **Scalabilité**
-- Stores modulaires
-- Facile d'ajouter de nouveaux stores
-- Migration progressive possible
+### ✅ **Scalability**
+- Modular stores
+- Easy to add new stores
+- Progressive migration possible
 
-## Migration depuis useState
+## Migration from useState
 
-### Avant (useState local)
+### Before (local useState)
 ```typescript
 const [activeTab, setActiveTab] = useState('dashboard');
 const [selectedTravailId, setSelectedTravailId] = useState<string | null>(null);
 ```
 
-### Après (Zustand global)
+### After (global Zustand)
 ```typescript
 const { activeTab, selectedTravailId, setActiveTab, setSelectedTravailId } = useNavigation();
 ```
 
-## Bonnes Pratiques
+## Best Practices
 
-### 1. **Sélecteurs Optimisés**
+### 1. **Optimized Selectors**
 ```typescript
-// ✅ Bon - Sélecteur spécifique
+// ✅ Good - Specific selector
 const { travaux } = useTravaux();
 
-// ❌ Éviter - Sélecteur trop large
+// ❌ Avoid - Too broad selector
 const store = useTravauxStore();
 ```
 
-### 2. **Actions Typées**
+### 2. **Typed Actions**
 ```typescript
-// ✅ Bon - Action typée
+// ✅ Good - Typed action
 addTravail: (travail: Omit<Travail, 'id'>) => void
 
-// ❌ Éviter - Action non typée
+// ❌ Avoid - Untyped action
 addTravail: (travail: any) => void
 ```
 
-### 3. **Gestion d'Erreurs**
+### 3. **Error Handling**
 ```typescript
-// ✅ Bon - Gestion d'erreur centralisée
+// ✅ Good - Centralized error handling
 try {
   setTravaux(newTravaux);
 } catch (err) {
-  setError('Erreur lors de la mise à jour');
+  setError('Error updating data');
 }
 ```
 
 ## DevTools
 
-En mode développement, les stores sont visibles dans les Redux DevTools avec les noms :
-- `app-store` pour AppStore
-- `travaux-store` pour TravauxStore
+In development mode, stores are visible in Redux DevTools with names:
+- `app-store` for AppStore
+- `travaux-store` for TravauxStore
 
-## Tests
+## Testing
 
-### Test d'un Store
+### Testing a Store
 ```typescript
 import { renderHook, act } from '@testing-library/react';
 import { useTravaux } from '../hooks/useApp';
@@ -130,9 +130,9 @@ test('should add travail', () => {
 });
 ```
 
-## Prochaines Étapes
+## Next Steps
 
-1. **Tests** : Ajouter des tests unitaires pour les stores
-2. **Persistance** : Implémenter la persistance avec `zustand/middleware`
-3. **Optimisation** : Ajouter `shallow` pour les comparaisons d'objets
-4. **Validation** : Intégrer Zod pour la validation des données 
+1. **Tests** : Add unit tests for stores
+2. **Persistence** : Implement persistence with `zustand/middleware`
+3. **Optimization** : Add `shallow` for object comparisons
+4. **Validation** : Integrate Zod for data validation 

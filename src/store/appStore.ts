@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-// Types pour l'état de l'application
+// Types for application state
 export interface AppState {
   // Navigation
   activeTab: string;
@@ -20,11 +20,11 @@ export interface AppState {
   resetApp: () => void;
 }
 
-// Store principal de l'application
+// Main application store
 export const useAppStore = create<AppState>()(
   devtools(
     (set) => ({
-      // État initial
+      // Initial state
       activeTab: 'dashboard',
       selectedTravailId: null,
       isLoading: false,

@@ -4,7 +4,7 @@ import { travaux as mockTravaux } from '../data/mockData';
 import { Travail } from '../types';
 import { validateTravail, validateCreateTravail } from '../schemas/validation';
 
-// Types pour l'état des travaux
+// Types for work state
 export interface TravauxState {
   // Data
   travaux: Travail[];
@@ -30,22 +30,22 @@ export interface TravauxState {
 
 }
 
-// Store pour la gestion des travaux
+// Store for work management
 export const useTravauxStore = create<TravauxState>()(
   devtools(
     (set, get) => ({
-      // État initial
+      // Initial state
       travaux: mockTravaux,
       selectedTravail: null,
       loading: false,
       error: null,
       
-      // Actions de données
+      // Data actions
       setTravaux: (travaux) => set({ travaux }),
       
       addTravail: (newTravail) => {
         try {
-          // Validation avec Zod
+          // Validation with Zod
           const validatedTravail = validateCreateTravail(newTravail);
           
           const travail: Travail = {
@@ -61,7 +61,7 @@ export const useTravauxStore = create<TravauxState>()(
             error: null 
           }));
         } catch (err: any) {
-          const errorMessage = err?.message || 'Erreur lors de l\'ajout du travail';
+          const errorMessage = err?.message || 'Error adding work';
           set({ error: errorMessage });
           console.error('Error adding travail:', err);
         }
@@ -69,7 +69,7 @@ export const useTravauxStore = create<TravauxState>()(
       
       updateTravail: (updates) => {
         try {
-          // Validation avec Zod
+          // Validation with Zod
           const validatedUpdates = validateTravail(updates);
           
           set((state) => ({
@@ -79,7 +79,7 @@ export const useTravauxStore = create<TravauxState>()(
             error: null
           }));
         } catch (err: any) {
-          const errorMessage = err?.message || 'Erreur lors de la mise à jour du travail';
+          const errorMessage = err?.message || 'Error updating work';
           set({ error: errorMessage });
           console.error('Error updating travail:', err);
         }
@@ -92,7 +92,7 @@ export const useTravauxStore = create<TravauxState>()(
             error: null
           }));
         } catch (err) {
-          set({ error: 'Erreur lors de la suppression du travail' });
+          set({ error: 'Error deleting work' });
           console.error('Error deleting travail:', err);
         }
       },

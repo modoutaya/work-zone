@@ -48,8 +48,8 @@ export const useValidation = <T>(schema: z.ZodSchema<T>, options: UseValidationO
         };
       }
       
-      // Erreur inattendue
-      const unexpectedError = { general: 'Erreur de validation inattendue' };
+      // Unexpected error
+      const unexpectedError = { general: 'Unexpected validation error' };
       setErrors(unexpectedError);
       options.onError?.(unexpectedError);
       
@@ -80,7 +80,7 @@ export const useValidation = <T>(schema: z.ZodSchema<T>, options: UseValidationO
   };
 };
 
-// Hook spécialisé pour la validation de formulaires
+// Specialized hook for form validation
 export const useFormValidation = <T>(schema: z.ZodSchema<T>) => {
   const [formData, setFormData] = useState<Partial<T>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -88,7 +88,7 @@ export const useFormValidation = <T>(schema: z.ZodSchema<T>) => {
 
   const updateField = useCallback((field: keyof T, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Effacer l'erreur du champ modifié
+    // Clear error for modified field
     if (errors[field as string]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -99,7 +99,7 @@ export const useFormValidation = <T>(schema: z.ZodSchema<T>) => {
   }, [errors]);
 
   const validateField = useCallback((field: keyof T) => {
-    // Validation simplifiée - on valide tout le formulaire
+    // Simplified validation - validate entire form
     setIsValidating(true);
     
     try {
@@ -157,7 +157,7 @@ export const useFormValidation = <T>(schema: z.ZodSchema<T>) => {
       return {
         isValid: false,
         data: null,
-        errors: { general: 'Erreur de validation inattendue' },
+        errors: { general: 'Unexpected validation error' },
       };
     }
   }, [schema, formData]);
