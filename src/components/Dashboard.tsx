@@ -1,26 +1,28 @@
 import React from 'react';
 import { TrendingUp, Clock, CheckCircle, DollarSign, Activity, MapPin } from 'lucide-react';
-import { useTravaux } from '../hooks/useTravaux';
+import { useTravauxStore } from '../store/travauxStore';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import ProgressBar from './ui/ProgressBar';
 import LoadingSpinner from './ui/LoadingSpinner';
 import ErrorMessage from './ui/ErrorMessage';
 
 const Dashboard: React.FC = () => {
-  const { travaux, loading, error } = useTravaux();
+  const travaux = useTravauxStore((state) => state.travaux);
+  const loading = useTravauxStore((state) => state.loading);
+  const error = useTravauxStore((state) => state.error);
+  
+  const statistiques = React.useMemo(() => ({
+    totalTravaux: travaux.length,
+    travauxEnCours: travaux.filter((t: any) => t.statut === 'en_cours').length,
+    travauxTermines: travaux.filter((t: any) => t.statut === 'termine').length,
+    budgetTotal: travaux.reduce((sum: number, t: any) => sum + t.budget, 0),
+    progressionMoyenne: travaux.length > 0 
+      ? Math.round(travaux.reduce((sum: number, t: any) => sum + t.progression, 0) / travaux.length)
+      : 0,
+    zonesActives: new Set(travaux.map((t: any) => t.zoneId)).size,
+  }), [travaux]);
 
-  const statistiques = React.useMemo(() => {
-    return {
-      totalTravaux: travaux.length,
-      travauxEnCours: travaux.filter(t => t.statut === 'en_cours').length,
-      travauxTermines: travaux.filter(t => t.statut === 'termine').length,
-      budgetTotal: travaux.reduce((sum, t) => sum + t.budget, 0),
-      progressionMoyenne: travaux.length > 0 
-        ? Math.round(travaux.reduce((sum, t) => sum + t.progression, 0) / travaux.length)
-        : 0,
-      zonesActives: new Set(travaux.map(t => t.zoneId)).size,
-    };
-  }, [travaux]);
+  const travauxRecents = React.useMemo(() => travaux.slice(0, 3), [travaux]);
 
   const cards = [
     {
@@ -67,7 +69,7 @@ const Dashboard: React.FC = () => {
     }
   ];
 
-  const travauxRecents = travaux.slice(0, 3);
+
 
   if (loading) {
     return (

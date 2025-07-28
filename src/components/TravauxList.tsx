@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Eye, Edit, Trash2 } from 'lucide-react';
-import { useTravaux } from '../hooks/useTravaux';
+import { useTravauxStore } from '../store/travauxStore';
 import { Travail } from '../types';
 import StatusBadge from './ui/StatusBadge';
 import PriorityBadge from './ui/PriorityBadge';
@@ -15,7 +15,10 @@ interface TravauxListProps {
 }
 
 const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
-  const { travaux, loading, error, deleteTravail } = useTravaux();
+  const travaux = useTravauxStore((state) => state.travaux);
+  const loading = useTravauxStore((state) => state.loading);
+  const error = useTravauxStore((state) => state.error);
+  const deleteTravail = useTravauxStore((state) => state.deleteTravail);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -26,7 +29,7 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
     }
   };
 
-  const filteredTravaux = travaux.filter(travail => {
+  const filteredTravaux = travaux.filter((travail: any) => {
     const matchesSearch = travail.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          travail.zone.nom.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !statusFilter || travail.statut === statusFilter;
@@ -141,10 +144,10 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
                     <span className="text-sm text-gray-800">{formatType(travail.type)}</span>
                   </td>
                   <td className="py-4 px-6">
-                    <StatusBadge status={travail.statut as any} />
+                    <StatusBadge status={travail.statut} />
                   </td>
                   <td className="py-4 px-6">
-                    <PriorityBadge priority={travail.priorite as any} />
+                    <PriorityBadge priority={travail.priorite} />
                   </td>
                   <td className="py-4 px-6">
                     <ProgressBar value={travail.progression} className="w-24" />
@@ -157,15 +160,20 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
                       <button 
                         onClick={() => onSelectTravail(travail)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                        aria-label="Voir le travail"
                       >
                         <Eye size={16} />
                       </button>
-                      <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                      <button 
+                        className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                        aria-label="Modifier le travail"
+                      >
                         <Edit size={16} />
                       </button>
                      <button 
                        onClick={() => handleDelete(travail.id)}
                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                       aria-label="Supprimer le travail"
                      >
                         <Trash2 size={16} />
                       </button>

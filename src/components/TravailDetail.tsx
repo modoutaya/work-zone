@@ -32,7 +32,7 @@ const TravailDetail: React.FC<TravailDetailProps> = ({ travail, onBack }) => {
                 <h3 className="text-2xl font-bold text-gray-800">{travail.titre}</h3>
                 <p className="text-gray-600 mt-2">{travail.description}</p>
               </div>
-              <StatusBadge status={travail.statut as any} size="lg" />
+              <StatusBadge status={travail.statut} size="lg" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

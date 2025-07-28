@@ -1,30 +1,37 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import TravauxList from './components/TravauxList';
 import TravailDetail from './components/TravailDetail';
 import ZonesList from './components/ZonesList';
-import { useTravaux } from './hooks/useTravaux';
+import { useAppStore } from './store/appStore';
+import { useTravauxStore } from './store/travauxStore';
 import { Travail } from './types';
 
 function App() {
-  const { getTravailById } = useTravaux();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedTravailId, setSelectedTravailId] = useState<string | null>(null);
+  const activeTab = useAppStore((state) => state.activeTab);
+  const selectedTravailId = useAppStore((state) => state.selectedTravailId);
+  const setActiveTab = useAppStore((state) => state.setActiveTab);
+  const setSelectedTravailId = useAppStore((state) => state.setSelectedTravailId);
+  
+  const getTravailById = useTravauxStore((state) => state.getTravailById);
+  const selectTravail = useTravauxStore((state) => state.selectTravail);
 
   const handleSelectTravail = (travail: Travail) => {
     setSelectedTravailId(travail.id);
+    selectTravail(travail);
   };
 
   const handleBackToList = () => {
     setSelectedTravailId(null);
+    selectTravail(null);
   };
 
-  const selectedTravail = selectedTravailId ? getTravailById(selectedTravailId) : null;
+  const currentSelectedTravail = selectedTravailId ? getTravailById(selectedTravailId) : null;
 
   const renderContent = () => {
-    if (selectedTravail) {
-      return <TravailDetail travail={selectedTravail} onBack={handleBackToList} />;
+    if (currentSelectedTravail) {
+      return <TravailDetail travail={currentSelectedTravail} onBack={handleBackToList} />;
     }
 
     switch (activeTab) {

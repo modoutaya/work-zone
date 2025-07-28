@@ -34,7 +34,13 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className={`flex-1 bg-gray-200 rounded-full ${sizeClasses[size]}`}>
+      <div 
+        className={`flex-1 bg-gray-200 rounded-full ${sizeClasses[size]}`}
+        role="progressbar"
+        aria-valuenow={Math.round(percentage)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div
           className={`${sizeClasses[size]} ${colorClasses[color]} rounded-full transition-all duration-500 ease-out`}
           style={{ width: `${percentage}%` }}

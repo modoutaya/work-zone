@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Users, Ruler, Plus, Eye, Edit } from 'lucide-react';
 import { zones } from '../data/mockData';
-import { useTravaux } from '../hooks/useTravaux';
+import { useTravaux } from '../hooks/useApp';
+
 import { formatNumber, formatCurrency } from '../utils/formatters';
 import LoadingSpinner from './ui/LoadingSpinner';
 import ErrorMessage from './ui/ErrorMessage';
