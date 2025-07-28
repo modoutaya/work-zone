@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import React from 'react';
 
 // Mock des modules externes
 vi.mock('zustand/middleware', () => ({
@@ -30,4 +31,16 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
+});
+
+// Disable lazy loading for tests by making React.lazy return the component directly
+vi.mock('react', async () => {
+  const actual = await vi.importActual('react');
+  return {
+    ...actual,
+    lazy: (importFn: () => Promise<any>) => {
+      // Return a component that immediately renders the imported component
+      return importFn().then(module => module.default);
+    },
+  };
 }); 

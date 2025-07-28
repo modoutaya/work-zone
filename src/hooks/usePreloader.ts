@@ -21,7 +21,10 @@ export const usePreloader = () => {
       await importFn();
       setPreloadedComponents(prev => new Set([...prev, componentName]));
     } catch (error) {
-      console.warn(`Failed to preload ${componentName}:`, error);
+      // Only log in browser environment
+      if (typeof window !== 'undefined') {
+        console.warn(`Failed to preload ${componentName}:`, error);
+      }
     }
   }, [preloadedComponents]);
 
