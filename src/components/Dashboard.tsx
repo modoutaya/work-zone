@@ -8,9 +8,12 @@ import ErrorMessage from './ui/ErrorMessage';
 
 const Dashboard: React.FC = () => {
   const { data: statistiques, isLoading: statsLoading, error: statsError } = useTravauxStats();
-  const { data: travaux, isLoading: travauxLoading, error: travauxError } = useTravaux();
+  const { data: travauxData, isLoading: travauxLoading, error: travauxError } = useTravaux();
 
-  const travauxRecents = React.useMemo(() => travaux?.slice(0, 3) || [], [travaux]);
+  const travauxRecents = React.useMemo(() => {
+    const travaux = travauxData?.data || [];
+    return travaux.slice(0, 3);
+  }, [travauxData]);
 
   const cards = [
     {

@@ -1,11 +1,32 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAppStore } from '../../store/appStore';
 import { useTravauxStore } from '../../store/travauxStore';
 
-// Wrapper pour les tests avec les stores Zustand
+// Create a new QueryClient for each test
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: 0,
+      gcTime: 0,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
+
+// Wrapper pour les tests avec les stores Zustand et React Query
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
+  const queryClient = createTestQueryClient();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
 };
 
 const customRender = (
@@ -17,6 +38,7 @@ const customRender = (
 export const resetStores = () => {
   useAppStore.getState().resetApp();
   useTravauxStore.getState().setTravaux([]);
+  useTravauxStore.getState().clearError();
 };
 
 export const createMockTravail = (overrides = {}) => ({
@@ -39,6 +61,8 @@ export const createMockTravail = (overrides = {}) => ({
   progression: 50,
   responsable: 'Test User',
   historique: [],
+  entreprise: '',
+  commentaires: '',
   ...overrides,
 });
 

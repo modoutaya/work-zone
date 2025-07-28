@@ -15,7 +15,8 @@ interface TravauxListProps {
 }
 
 const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
-  const { data: travaux = [], isLoading, error } = useTravaux();
+  const { data: travauxData, isLoading, error } = useTravaux();
+  const travaux = travauxData?.data || [];
   const deleteTravailMutation = useDeleteTravail();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');

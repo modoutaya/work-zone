@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '../test/utils/test-utils';
 import App from '../App';
-import { useAppStore } from '../store/appStore';
-import { useTravauxStore } from '../store/travauxStore';
+import { resetStores } from '../test/utils/test-utils';
+import { mockApi } from '../lib/api/mock/mockApi';
 
 describe('App Integration', () => {
   beforeEach(() => {
-    useAppStore.getState().resetApp();
-    useTravauxStore.getState().setTravaux([]);
+    resetStores();
+    mockApi.reset();
   });
 
   it('should render app with dashboard by default', async () => {
@@ -59,21 +59,27 @@ describe('App Integration', () => {
     }, { timeout: 3000 });
   });
 
-  it('should show loading state when store is loading', () => {
-    useTravauxStore.getState().setLoading(true);
+  it('should show loading state when store is loading', async () => {
     render(<App />);
     
+    // Initially should show loading
     expect(screen.getByRole('status')).toBeInTheDocument();
+    
+    // Wait for content to load
+    await waitFor(() => {
+      expect(screen.getByText('Tableau de Bord')).toBeInTheDocument();
+    }, { timeout: 3000 });
   });
 
   it('should show error state when store has error', async () => {
-    useTravauxStore.getState().setError('Test error');
-    useTravauxStore.getState().setLoading(false);
+    // Mock API to throw error
+    mockApi.setShouldFail(true);
+    
     render(<App />);
     
     // Wait for error to appear after lazy loading
     await waitFor(() => {
-      expect(screen.getByText('Test error')).toBeInTheDocument();
+      expect(screen.getByText(/erreur/i)).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 }); 
