@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { usePreloader } from '../hooks/usePreloader';
 
 const LazyLoadingTest: React.FC = () => {
-  const [activeComponent, setActiveComponent] = useState<string>('');
+  const [activeComponent] = useState<string>('');
   const { preloadMultiple, isPreloaded, preloadedComponents } = usePreloader();
 
   const components = [
