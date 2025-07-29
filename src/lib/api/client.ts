@@ -1,4 +1,5 @@
 import { useAppStore } from '../../store/appStore';
+import { generateCSRFToken, validateCSRFToken } from '../../utils/security';
 
 // API Configuration
 const API_CONFIG = {
@@ -34,6 +35,7 @@ export interface ApiError {
 class AuthManager {
   private tokenKey = 'auth_token';
   private refreshTokenKey = 'refresh_token';
+  private csrfTokenKey = 'csrf_token';
 
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
@@ -54,18 +56,35 @@ class AuthManager {
   clearTokens(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.csrfTokenKey);
   }
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  // CSRF Token management
+  getCSRFToken(): string | null {
+    return localStorage.getItem(this.csrfTokenKey);
+  }
+
+  setCSRFToken(token: string): void {
+    localStorage.setItem(this.csrfTokenKey, token);
+  }
+
+  generateAndSetCSRFToken(): string {
+    const token = generateCSRFToken();
+    this.setCSRFToken(token);
+    return token;
   }
 }
 
 // Interceptors
 class RequestInterceptor {
   intercept(request: ApiRequest): ApiRequest {
-    // Add auth token
     const authManager = new AuthManager();
+    
+    // Add auth token
     if (authManager.isAuthenticated()) {
       request.headers = {
         ...request.headers,
@@ -73,9 +92,22 @@ class RequestInterceptor {
       };
     }
 
+    // Add CSRF token for state-changing requests
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+      let csrfToken = authManager.getCSRFToken();
+      if (!csrfToken) {
+        csrfToken = authManager.generateAndSetCSRFToken();
+      }
+      request.headers = {
+        ...request.headers,
+        'X-CSRF-Token': csrfToken,
+      };
+    }
+
     // Add default headers
     request.headers = {
       'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest', // Prevent CSRF
       ...request.headers,
     };
 
@@ -104,6 +136,11 @@ class ResponseInterceptor {
         // Could redirect to login page here
       } else if (response.status === 403) {
         useAppStore.getState().setError('Access denied. You don\'t have permission for this action.');
+      } else if (response.status === 419) {
+        // CSRF token mismatch
+        const authManager = new AuthManager();
+        authManager.generateAndSetCSRFToken();
+        useAppStore.getState().setError('Security token expired. Please try again.');
       } else if (response.status >= 500) {
         useAppStore.getState().setError('Server error. Please try again later.');
       }
@@ -141,6 +178,7 @@ class ApiClient {
       method: interceptedRequest.method,
       headers: interceptedRequest.headers,
       signal: AbortSignal.timeout(API_CONFIG.timeout),
+      credentials: 'include', // Include cookies for CSRF protection
     };
 
     if (interceptedRequest.data && interceptedRequest.method !== 'GET') {
@@ -185,12 +223,12 @@ class ApiClient {
     return this.makeRequest<T>({ url, method: 'PUT', data });
   }
 
-  async patch<T>(url: string, data?: any): Promise<ApiResponse<T>> {
-    return this.makeRequest<T>({ url, method: 'PATCH', data });
-  }
-
   async delete<T>(url: string): Promise<ApiResponse<T>> {
     return this.makeRequest<T>({ url, method: 'DELETE' });
+  }
+
+  async patch<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return this.makeRequest<T>({ url, method: 'PATCH', data });
   }
 }
 
