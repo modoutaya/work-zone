@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormValidation } from '../../hooks/useValidation';
-import { CreateTravailSchema } from '../../schemas/validation';
+import { CreateTravailSchema, type CreateTravail } from '../../schemas/validation';
 import { useTravauxStore } from '../../store/travauxStore';
 import { sanitizeInput, sanitizeObject } from '../../utils/security';
 import type { Travail } from '../../types';
@@ -37,7 +37,7 @@ export const TravailForm: React.FC<TravailFormProps> = ({
     }
   }, [travail, updateField]);
 
-  const handleInputChange = (field: keyof Travail, value: string | number) => {
+  const handleInputChange = (field: keyof CreateTravail, value: string | number) => {
     // Sanitize string inputs
     const sanitizedValue = typeof value === 'string' ? sanitizeInput(value) : value;
     updateField(field, sanitizedValue);
@@ -54,18 +54,39 @@ export const TravailForm: React.FC<TravailFormProps> = ({
         const sanitizedData = sanitizeObject(result.data);
         
         if (travail?.id) {
-          // Mise à jour
-          await updateTravail({ ...sanitizedData, id: travail.id });
-        } else {
-          // Création
-          const newTravail = {
+          // Create complete Travail object for updateTravail
+          const updatedTravail: Travail = {
+            ...travail,
             ...sanitizedData,
-            id: Date.now().toString(),
-            historique: [],
-            entreprise: '',
-            commentaires: '',
+            id: travail.id,
+            historique: travail.historique || [],
+            zone: travail.zone,
           };
-          await addTravail(newTravail);
+          await updateTravail(updatedTravail);
+        } else {
+          const newTravailData = {
+            titre: sanitizedData.titre,
+            description: sanitizedData.description,
+            zoneId: sanitizedData.zoneId,
+            zone: {
+              id: sanitizedData.zoneId,
+              nom: 'Zone par défaut',
+              type: 'département' as const,
+              code: sanitizedData.zoneId,
+            },
+            type: sanitizedData.type,
+            statut: sanitizedData.statut,
+            priorite: sanitizedData.priorite,
+            budget: sanitizedData.budget,
+            dateDebut: sanitizedData.dateDebut,
+            dateFin: sanitizedData.dateFin,
+            progression: sanitizedData.progression,
+            responsable: sanitizedData.responsable,
+            historique: [],
+            entreprise: sanitizedData.entreprise || '',
+            commentaires: sanitizedData.commentaires || '',
+          };
+          await addTravail(newTravailData);
         }
         
         resetForm();

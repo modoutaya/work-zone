@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background - blue rounded square -->
+  <rect x="2" y="2" width="28" height="28" rx="4" fill="url(#bgGradient)" stroke="#1E40AF" stroke-width="0.5"/>
+  
+  <!-- Construction crane (light blue/grey) -->
+  <g fill="#94A3B8" stroke="#64748B" stroke-width="0.3">
+    <!-- Crane tower -->
+    <rect x="4" y="8" width="1.5" height="8" fill="#94A3B8"/>
+    <!-- Crane boom -->
+    <rect x="4" y="8" width="6" height="1" fill="#94A3B8"/>
+    <!-- Crane hook and block -->
+    <rect x="8.5" y="6" width="1" height="2" fill="#94A3B8"/>
+    <rect x="8" y="4" width="2" height="1" fill="#94A3B8"/>
+    <!-- Suspended block -->
+    <rect x="7.5" y="9" width="2" height="1.5" fill="#64748B"/>
+  </g>
+  
+  <!-- Stack of orange-red bricks -->
+  <g fill="#F97316" stroke="#EA580C" stroke-width="0.2">
+    <!-- Bottom row -->
+    <rect x="12" y="18" width="3" height="1.5" fill="#F97316"/>
+    <rect x="16" y="18" width="3" height="1.5" fill="#F97316"/>
+    <!-- Middle row -->
+    <rect x="13.5" y="16.5" width="3" height="1.5" fill="#F97316"/>
+    <rect x="17.5" y="16.5" width="3" height="1.5" fill="#F97316"/>
+    <!-- Top row -->
+    <rect x="15" y="15" width="3" height="1.5" fill="#F97316"/>
+    <rect x="19" y="15" width="3" height="1.5" fill="#F97316"/>
+  </g>
+  
+  <!-- Yellow hard hat -->
+  <g fill="#FCD34D" stroke="#F59E0B" stroke-width="0.3">
+    <!-- Hat base -->
+    <ellipse cx="24" cy="20" rx="3" ry="2" fill="#FCD34D"/>
+    <!-- Hat top -->
+    <ellipse cx="24" cy="18" rx="2.5" ry="1.5" fill="#FCD34D"/>
+    <!-- Hat brim -->
+    <ellipse cx="24" cy="21.5" rx="3.5" ry="0.8" fill="#FCD34D"/>
+  </g>
+  
+  <!-- Workzone text -->
+  <text x="16" y="28" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="white" font-weight="bold">workzone</text>
+</svg> 

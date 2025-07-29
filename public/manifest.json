@@ -1,0 +1,20 @@
+{
+  "name": "Work Zone - Suivi de Travaux",
+  "short_name": "Work Zone",
+  "description": "Application de gestion et suivi de travaux et zones géographiques",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "lang": "fr",
+  "dir": "ltr"
+} 

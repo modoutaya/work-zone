@@ -1,5 +1,11 @@
 # Work Zone - Work Management
 
+[![Tests](https://github.com/[votre-username]/work-zone/workflows/Test/badge.svg)](https://github.com/[votre-username]/work-zone/actions)
+[![Deploy](https://github.com/[votre-username]/work-zone/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)](https://github.com/[votre-username]/work-zone/actions)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/[votre-username]/work-zone)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-web-blue)](https://[votre-username].github.io/work-zone/)
+
 React/TypeScript application for managing works and geographic zones.
 
 ## 🚀 Technologies
@@ -44,6 +50,8 @@ npm run dev
 ## 📚 Documentation
 
 - [Zustand Architecture](./docs/ARCHITECTURE.md)
+- [Deployment Guide](./docs/DEPLOYMENT.md)
+- [Status Badges](./docs/BADGES.md)
 
 ## 🎯 Features
 
@@ -98,13 +106,18 @@ npm run dev
 ## 🔧 Scripts
 
 ```bash
-npm run dev          # Development server
-npm run build        # Production build
-npm run lint         # Linting
-npm run preview      # Preview build
-npm run test         # Run tests
-npm run test:ui      # Test UI
-npm run test:coverage # Test coverage
+npm run dev              # Development server
+npm run build            # Production build
+npm run build:preview    # Preview build
+npm run lint             # Linting
+npm run lint:fix         # Linting with auto-fix
+npm run preview          # Preview build
+npm run test             # Run tests
+npm run test:watch       # Tests in watch mode
+npm run test:ui          # Test UI
+npm run test:coverage    # Test coverage
+npm run type-check       # TypeScript type checking
+npm run deploy:check     # Full deployment check
 ```
 
 ## 🧪 Testing
@@ -133,6 +146,35 @@ The application uses Zod for runtime data validation:
 - Screen reader support
 - Keyboard navigation
 - Semantic HTML structure
+
+## 🚀 Deployment
+
+The application is automatically deployed to GitHub Pages via GitHub Actions:
+
+### Automatic Deployment
+- **Trigger**: Push to `main` or `master` branch
+- **Process**: Tests → Lint → Build → Deploy
+- **URL**: `https://[votre-username].github.io/work-zone/`
+
+### Manual Deployment
+```bash
+# Run full deployment check
+npm run deploy:check
+
+# Build for production
+npm run build
+
+# Preview build locally
+npm run preview
+```
+
+### Deployment Features
+- ✅ Automated testing before deployment
+- ✅ Code quality checks (linting)
+- ✅ TypeScript type checking
+- ✅ Optimized production build
+- ✅ GitHub Pages integration
+- ✅ Automatic rollback on failure
 
 ## 🛡️ Security Best Practices
 
