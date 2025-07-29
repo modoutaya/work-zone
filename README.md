@@ -1,5 +1,11 @@
 # Work Zone - Work Management
 
+[![Tests](https://github.com/modoutaya/work-zone/workflows/CI/badge.svg)](https://github.com/modoutaya/work-zone/actions)
+[![Deploy](https://github.com/modoutaya/work-zone/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)](https://github.com/modoutaya/work-zone/actions)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/modoutaya/work-zone)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-web-blue)](https://modoutaya.github.io/work-zone/)
+
 React/TypeScript application for managing works and geographic zones.
 
 ## 🚀 Technologies
@@ -44,6 +50,9 @@ npm run dev
 ## 📚 Documentation
 
 - [Zustand Architecture](./docs/ARCHITECTURE.md)
+- [Deployment Guide](./docs/DEPLOYMENT.md)
+- [Status Badges](./docs/BADGES.md)
+- [Troubleshooting Guide](./docs/TROUBLESHOOTING.md)
 
 ## 🎯 Features
 
@@ -98,13 +107,18 @@ npm run dev
 ## 🔧 Scripts
 
 ```bash
-npm run dev          # Development server
-npm run build        # Production build
-npm run lint         # Linting
-npm run preview      # Preview build
-npm run test         # Run tests
-npm run test:ui      # Test UI
-npm run test:coverage # Test coverage
+npm run dev              # Development server
+npm run build            # Production build
+npm run build:preview    # Preview build
+npm run lint             # Linting
+npm run lint:fix         # Linting with auto-fix
+npm run preview          # Preview build
+npm run test             # Run tests
+npm run test:watch       # Tests in watch mode
+npm run test:ui          # Test UI
+npm run test:coverage    # Test coverage
+npm run type-check       # TypeScript type checking
+npm run deploy:check     # Full deployment check
 ```
 
 ## 🧪 Testing
@@ -134,6 +148,41 @@ The application uses Zod for runtime data validation:
 - Keyboard navigation
 - Semantic HTML structure
 
+## 🚀 Deployment
+
+The application is automatically deployed to GitHub Pages via GitHub Actions:
+
+### Automatic Deployment
+- **Trigger**: Tag creation (e.g., `v1.0.0`)
+- **Process**: Tests → Lint → Build → Deploy
+- **URL**: `https://modoutaya.github.io/work-zone/`
+
+### Manual Deployment
+```bash
+# Run full deployment check
+npm run deploy:check
+
+# Build for production
+npm run build
+
+# Preview build locally
+npm run preview
+```
+
+### Deployment Features
+- ✅ Automated testing before deployment
+- ✅ Code quality checks (linting)
+- ✅ TypeScript type checking
+- ✅ Optimized production build
+- ✅ GitHub Pages integration
+- ✅ Automatic rollback on failure
+
+### Creating a Release
+```bash
+# Create and push a tag to trigger deployment
+git tag v1.0.0
+git push origin v1.0.0
+```
 ## 🛡️ Security Best Practices
 
 ### Input Validation

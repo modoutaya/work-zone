@@ -28,7 +28,7 @@ const TravauxList: React.FC<TravauxListProps> = ({ onSelectTravail }) => {
     }
   };
 
-  const filteredTravaux = travaux.filter((travail: any) => {
+  const filteredTravaux = travaux.filter((travail: Travail) => {
     const matchesSearch = travail.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          travail.zone.nom.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !statusFilter || travail.statut === statusFilter;

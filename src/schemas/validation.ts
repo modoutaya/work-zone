@@ -42,7 +42,7 @@ export const CreateTravailSchema = z.object({
   titre: z.string().min(3, 'Titre doit contenir au moins 3 caractères').max(100, 'Titre trop long'),
   description: z.string().min(10, 'Description doit contenir au moins 10 caractères').max(500, 'Description trop longue'),
   zoneId: z.string().min(1, 'ID de zone requis'),
-  zone: ZoneSchema,
+  zone: ZoneSchema.optional(), // Optionnel pour la création
   type: z.enum(['infrastructure', 'transport', 'energie', 'eau', 'education', 'sante']),
   statut: z.enum(['planifie', 'en_cours', 'suspendu', 'termine', 'annule']),
   priorite: z.enum(['basse', 'normale', 'haute', 'urgente']),

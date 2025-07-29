@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TravailForm } from './TravailForm';
-import { validateTravail, validateCreateTravail } from '../../schemas/validation';
+import { validateTravail } from '../../schemas/validation';
 
 export const ValidationDemo: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -32,8 +32,9 @@ export const ValidationDemo: React.FC = () => {
     try {
       const validatedData = validateTravail(testData);
       setValidationResult(`✅ Validation réussie: ${JSON.stringify(validatedData, null, 2)}`);
-    } catch (error: any) {
-      setValidationResult(`❌ Erreur de validation: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      setValidationResult(`❌ Erreur de validation: ${errorMessage}`);
     }
   };
 
@@ -63,8 +64,9 @@ export const ValidationDemo: React.FC = () => {
     try {
       validateTravail(invalidData);
       setValidationResult('❌ La validation aurait dû échouer');
-    } catch (error: any) {
-      setValidationResult(`✅ Erreurs détectées correctement: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      setValidationResult(`✅ Erreurs détectées correctement: ${errorMessage}`);
     }
   };
 
