@@ -6,11 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:preview": "vite build --mode preview",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "test": "vitest --run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "type-check": "tsc --noEmit",
+    "deploy:check": "npm run type-check && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.83.0",
