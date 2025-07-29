@@ -1,11 +1,12 @@
 import React from 'react';
 import { useFormValidation } from '../../hooks/useValidation';
-import { CreateTravailSchema, CreateTravail } from '../../schemas/validation';
+import { CreateTravailSchema } from '../../schemas/validation';
 import { useTravauxStore } from '../../store/travauxStore';
-import { zones } from '../../data/mockData';
+import { sanitizeInput, sanitizeObject } from '../../utils/security';
+import type { Travail } from '../../types';
 
 interface TravailFormProps {
-  travail?: CreateTravail;
+  travail?: Travail;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -36,6 +37,12 @@ export const TravailForm: React.FC<TravailFormProps> = ({
     }
   }, [travail, updateField]);
 
+  const handleInputChange = (field: keyof Travail, value: string | number) => {
+    // Sanitize string inputs
+    const sanitizedValue = typeof value === 'string' ? sanitizeInput(value) : value;
+    updateField(field, sanitizedValue);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -43,13 +50,16 @@ export const TravailForm: React.FC<TravailFormProps> = ({
     
     if (result.isValid && result.data) {
       try {
+        // Sanitize all data before submission
+        const sanitizedData = sanitizeObject(result.data);
+        
         if (travail?.id) {
           // Mise à jour
-          await updateTravail({ ...result.data, id: travail.id });
+          await updateTravail({ ...sanitizedData, id: travail.id });
         } else {
           // Création
           const newTravail = {
-            ...result.data,
+            ...sanitizedData,
             id: Date.now().toString(),
             historique: [],
             entreprise: '',
@@ -83,11 +93,13 @@ export const TravailForm: React.FC<TravailFormProps> = ({
             type="text"
             id="titre"
             value={formData.titre || ''}
-            onChange={(e) => updateField('titre', e.target.value)}
+            onChange={(e) => handleInputChange('titre', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.titre ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Titre du travail"
+            maxLength={100}
+            required
           />
           {errors.titre && (
             <p className="mt-1 text-sm text-red-600">{errors.titre}</p>
@@ -103,11 +115,13 @@ export const TravailForm: React.FC<TravailFormProps> = ({
             id="description"
             rows={4}
             value={formData.description || ''}
-            onChange={(e) => updateField('description', e.target.value)}
+            onChange={(e) => handleInputChange('description', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.description ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Description détaillée du travail"
+            maxLength={500}
+            required
           />
           {errors.description && (
             <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -122,24 +136,16 @@ export const TravailForm: React.FC<TravailFormProps> = ({
           <select
             id="zoneId"
             value={formData.zoneId || ''}
-            onChange={(e) => {
-              const zoneId = e.target.value;
-                             const zone = zones.find((z: any) => z.id === zoneId);
-              updateField('zoneId', zoneId);
-              if (zone) {
-                updateField('zone', zone);
-              }
-            }}
+            onChange={(e) => handleInputChange('zoneId', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.zoneId ? 'border-red-500' : 'border-gray-300'
             }`}
+            required
           >
             <option value="">Sélectionner une zone</option>
-            {zones.map((zone: any) => (
-              <option key={zone.id} value={zone.id}>
-                {zone.nom} ({zone.type})
-              </option>
-            ))}
+            <option value="1">Paris (75)</option>
+            <option value="2">Lyon (69)</option>
+            <option value="3">Marseille (13)</option>
           </select>
           {errors.zoneId && (
             <p className="mt-1 text-sm text-red-600">{errors.zoneId}</p>
@@ -154,10 +160,11 @@ export const TravailForm: React.FC<TravailFormProps> = ({
           <select
             id="type"
             value={formData.type || ''}
-            onChange={(e) => updateField('type', e.target.value)}
+            onChange={(e) => handleInputChange('type', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.type ? 'border-red-500' : 'border-gray-300'
             }`}
+            required
           >
             <option value="">Sélectionner un type</option>
             <option value="infrastructure">Infrastructure</option>
@@ -180,10 +187,11 @@ export const TravailForm: React.FC<TravailFormProps> = ({
           <select
             id="statut"
             value={formData.statut || ''}
-            onChange={(e) => updateField('statut', e.target.value)}
+            onChange={(e) => handleInputChange('statut', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.statut ? 'border-red-500' : 'border-gray-300'
             }`}
+            required
           >
             <option value="">Sélectionner un statut</option>
             <option value="planifie">Planifié</option>
@@ -205,16 +213,17 @@ export const TravailForm: React.FC<TravailFormProps> = ({
           <select
             id="priorite"
             value={formData.priorite || ''}
-            onChange={(e) => updateField('priorite', e.target.value)}
+            onChange={(e) => handleInputChange('priorite', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.priorite ? 'border-red-500' : 'border-gray-300'
             }`}
+            required
           >
             <option value="">Sélectionner une priorité</option>
             <option value="basse">Basse</option>
             <option value="normale">Normale</option>
             <option value="haute">Haute</option>
-            <option value="critique">Critique</option>
+            <option value="urgente">Urgente</option>
           </select>
           {errors.priorite && (
             <p className="mt-1 text-sm text-red-600">{errors.priorite}</p>
@@ -232,11 +241,12 @@ export const TravailForm: React.FC<TravailFormProps> = ({
             min="0"
             step="1000"
             value={formData.budget || ''}
-            onChange={(e) => updateField('budget', Number(e.target.value))}
+            onChange={(e) => handleInputChange('budget', Number(e.target.value))}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.budget ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="0"
+            required
           />
           {errors.budget && (
             <p className="mt-1 text-sm text-red-600">{errors.budget}</p>
@@ -252,11 +262,13 @@ export const TravailForm: React.FC<TravailFormProps> = ({
             type="text"
             id="responsable"
             value={formData.responsable || ''}
-            onChange={(e) => updateField('responsable', e.target.value)}
+            onChange={(e) => handleInputChange('responsable', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.responsable ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Nom du responsable"
+            maxLength={50}
+            required
           />
           {errors.responsable && (
             <p className="mt-1 text-sm text-red-600">{errors.responsable}</p>
@@ -272,10 +284,11 @@ export const TravailForm: React.FC<TravailFormProps> = ({
             type="date"
             id="dateDebut"
             value={formData.dateDebut || ''}
-            onChange={(e) => updateField('dateDebut', e.target.value)}
+            onChange={(e) => handleInputChange('dateDebut', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.dateDebut ? 'border-red-500' : 'border-gray-300'
             }`}
+            required
           />
           {errors.dateDebut && (
             <p className="mt-1 text-sm text-red-600">{errors.dateDebut}</p>
@@ -291,10 +304,11 @@ export const TravailForm: React.FC<TravailFormProps> = ({
             type="date"
             id="dateFin"
             value={formData.dateFin || ''}
-            onChange={(e) => updateField('dateFin', e.target.value)}
+            onChange={(e) => handleInputChange('dateFin', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.dateFin ? 'border-red-500' : 'border-gray-300'
             }`}
+            required
           />
           {errors.dateFin && (
             <p className="mt-1 text-sm text-red-600">{errors.dateFin}</p>
@@ -313,11 +327,12 @@ export const TravailForm: React.FC<TravailFormProps> = ({
             max="100"
             step="5"
             value={formData.progression || ''}
-            onChange={(e) => updateField('progression', Number(e.target.value))}
+            onChange={(e) => handleInputChange('progression', Number(e.target.value))}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.progression ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="0"
+            required
           />
           {errors.progression && (
             <p className="mt-1 text-sm text-red-600">{errors.progression}</p>
